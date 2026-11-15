@@ -77,8 +77,9 @@ void save_inode_list(const char *path){
         else{
 		for(size_t i = 0; i < inode_count; i++){
 			if(fwrite(&inode_list[i], sizeof(Inode), 1, fp) != 1){
+				//mismatch in wirtting:
 				printf("ERROR: failed to write inode %u\n", inode_list[i].inode);
-				fclose(fp);
+				fclose(fp);//close before exiting on error
 				exit(1);
 			}
 		}
