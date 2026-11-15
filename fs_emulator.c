@@ -142,10 +142,9 @@ int main(int argc, char *argv[]){
 				char *extra = strtok(NULL, " \t\n");//more than one argument provided
 
 				//check if empty command
-                                if(cmd == NULL && arg == NULL){
-                                        printf("ERROR: no command provided\n");
-                                        continue;
-                                }
+                                if(cmd == NULL) continue;
+                                //check validity
+				if(!valid(cmd, arg, extra)) continue;
 
 				//32 filename length limit
 				char arg_len[NAME_LEN + 1];
@@ -156,23 +155,19 @@ int main(int argc, char *argv[]){
 
 				//commands and their behavior
 				if(strcmp(cmd, "exit") == 0){
-					if(!valid(cmd, arg)) continue;
-					//function
+					break;
+					//break out of while loop
 				}
 				else if(strcmp(cmd, "cd") == 0){ 
-					if(!valid(cmd, arg)) continue;
                                         //function
 				}
 				else if(strcmp(cmd, "ls") == 0){
-					if(!valid(cmd, arg)) continue;
-                                        //function
+					//function
 				}
 				else if(strcmp(cmd, "mkdir") == 0){
-					if(!valid(cmd, arg)) continue;
                                         //function
 				}
 				else if(strcmp(cmd, "touch") == 0){
-					if(!valid(cmd, arg)) continue;
                                         //function
 				}
 			}//end while(1)
