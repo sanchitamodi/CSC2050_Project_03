@@ -12,8 +12,8 @@
 typedef struct{
 	uint32_t inode;
 	uint32_t parent_inode;
-	char name[NAME_LEN]; //name of file/directory
 	char type; //directory 'd' or file 'f'
+	char name[NAME_LEN]; //name of file/directory
 } Inode;
 
 //GLOBAL VARIABLES
@@ -67,7 +67,7 @@ void load_inode_list(const char *path){
 	}
 }
 //(REQUIREMENT 4)
-void save_inode_list(const char *path){
+void save_inode_list(const char *path){ //after exit
 	//write content of inode_list to file path
 	FILE *fp = fopen(path, "wb");
 	if(fp == NULL){ //check successfull open
@@ -76,8 +76,9 @@ void save_inode_list(const char *path){
         }
         else{
 		for(size_t i = 0; i < inode_count; i++){
+			//CHECK FORMATTING FOR READING AND WRITING WHILE TESTING!!!
 			if(fwrite(&inode_list[i], sizeof(Inode), 1, fp) != 1){
-				//mismatch in wirtting:
+				//nothing was written:
 				printf("ERROR: failed to write inode %u\n", inode_list[i].inode);
 				fclose(fp);//close before exiting on error
 				exit(1);
@@ -87,17 +88,26 @@ void save_inode_list(const char *path){
 	}
 }
 
-void change_dir(const char *name){
+void change_dir(const char *name){ //cd
 	//iterate through inode_list to search whether a directory with name alr exists
 	//if yes, then set curr_inode value to the index of the list with that name
 	//otherwise print an error message to indicate that directory was not found
 }
 
-void list_contents(){
-	//iterate through inodes_list and print members of those elements in the list for which the parent_inode is the curr_inode
+void list_contents(){ //ls
+	//iterate through inodes_list and print members of those elements in the list for which 
+	//the parent_inode is the curr_inode
+	
+	for(size_t i = 0; i < inode_count; i++){//iterate through inodes_list
+		if(inode_list[i].parent_inode == curr_inode){//check parent and curr_node then print in specified format
+			printf("inode: %u, type: %c, name: %.32s\n", inode_list[i].inode, inode_list[i].type, inode_list[i].name);
+			//ex: inode: 0, type: d, name: demo
+		}
+	}
+	
 }
 
-void create_dir(const char *name){
+void create_dir(const char *name){ //mkdir
 	//iterate through inode_list to see if the name of the directory exists, if yes then exit
 	//check to see if inode_count is 1024, if yes then exit
 	//create new inode with new inode)count, set its parent_inode and type and also its name
@@ -105,7 +115,7 @@ void create_dir(const char *name){
 	//white into this file its . and .. values
 }
 
-void create_file(const char *name){
+void create_file(const char *name){ //touch
 	//iterate through inode_list to see if filename exists, if yes then exit
 	//check is the inode_count is 1024, if yes then exit
 	//create new entry for an inode in inode_list
@@ -173,7 +183,7 @@ int main(int argc, char *argv[]){
 				char arg_len[NAME_LEN + 1];
 				if(arg != NULL){
 					strncpy(arg_len, arg, NAME_LEN); //copy 32 characters
-					arg_len[NAME_LEN] = '\0'; //last char is null terminator
+					arg_len[NAME_LEN] = '\0'; //33rd character is null terminator
 				}
 				//arg_len is the argument modified to fit the limit of 32 chars
 				//for directory and file names, so all functions use arg_len as parameters 
