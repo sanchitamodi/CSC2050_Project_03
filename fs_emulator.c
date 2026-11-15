@@ -23,6 +23,69 @@ size_t inode_count = 0;//count of # of inodes in list, initialized to zero
 uint32_t curr_inode = 0; //var to keep track of curr inode
 
 //----------------------------------------------------------------------------------------
+//HELPER FUNCTIONS
+//helper to check if user commands have all expected compoents
+bool valid(char *cmd, char *arg, char *extra){
+        //takes_none: commads that don't expect any arguments
+        //takes_arg: comands that expect one argument
+        bool takes_none = (strcmp(cmd, "exit") == 0 || strcmp(cmd, "ls") == 0);
+        bool takes_arg = (strcmp(cmd, "cd") == 0 || strcmp(cmd, "mkdir") == 0 || strcmp(cmd, "touch") == 0);
+
+        if(!takes_none && !takes_arg){ //neither of the recognized categories, so unknown command
+                printf("ERROR: unrecognized command\n");
+                return false;
+        }
+        if(takes_none && arg != NULL){ //exit and ls are inputted w arguments
+                printf("ERROR: %s does not expect arguments\n", cmd);
+                return false;
+        }
+        if(takes_arg && (arg == NULL || extra != NULL)){ //cd, mkdir, touch w no arg or extra args
+                printf("ERROR: %s expects exactly one argument\n", cmd);
+                return false;
+        }
+        return true;
+        //true = commands and arguments match the expected amount
+        //false = commands and arguments don't match the expected amount
+
+}
+
+//convert uint32 to string (used in mkdir when naming the new inode)
+char *uint32_to_str(uint32_t i){
+	int length = snprintf(NULL, 0, "%u", i);
+	if(length < 0) return NULL;
+	
+	char *str = (char*) malloc(sizeof(char) * (length + 1));
+	if (str == NULL) return NULL;
+
+	snprintf(str, length + 1; "%u", i);
+	return str;
+}
+//returns possible inode number for new entry, one past highest inode number in use)
+uint32_t find_free_inode(){
+	uint32_t highest = 0;
+	for(size_t i = 0; i < inode_count; i++){
+		if(inode_list[i].inode > highest){
+			highest = inode_list[i].inode;
+		}
+	}
+	if(highest + 1 >= MAX_INODES){
+		return -1; //no inodes availaible in range 0 to 1023
+	}
+	return highest + 1;
+}
+
+//returns file pointer to file with same name as inode_number for wirting, used in mkdir and touch
+FILE *create_inode_file(uint32_t inode_number, const char *mode){
+	char *filename = uint32_to_str(inode_number); // uint32 inode number to string
+	if(filename == NULL){ //check if successful
+		return NULL;
+	}
+	FILE *fp = fopen(filename, mode); //open for writing
+	free(filename);
+	return fp;
+}
+
+//----------------------------------------------------------------------------------------
 //REQUIRED FUNCTIONS
 //(REQUIREMENT 2)
 void load_inode_list(const char *path){
@@ -55,16 +118,19 @@ void load_inode_list(const char *path){
 			inode_list[inode_count] = temp;
 			inode_count++;
 		}
+
+		fclose(fp); //close file pointer after reading
+
  		//emulation starts in the directory at inode 0, if this isn't a directory
 		//then report error and terminate
 		if(inode_count == 0 || inode_list[0].inode != 0 || inode_list[0].type != 'd'){
-			printf("ERROR: inode 0 is not a directory or not is not in use\n");
+			printf("ERROR: inode 0 is not a directory or is not in use\n");
 			exit(1);	
 		}		
 
 		//curr_inode (current working directory) is already initialized to 0
 	
-		fclose(fp);//close file pointer after reading
+		//fclose(fp);//close file pointer after reading
 	}
 }
 //(REQUIREMENT 4)
@@ -125,11 +191,38 @@ void list_contents(){ //ls
 
 void create_dir(const char *name){ //mkdir
 	//iterate through inode_list to see if the name of the directory exists, if yes then exit
+	for(size_t i = 0; i < inode_count; i++){
+		//check parent directory then comapre names
+		if(inode_list[i].parent_inode == curr_inode && strncmp(inode_list[i].name, name, NAME_LEN) == 0){
+			printf("ERROR: entry with name %s already exists in this directory\n", name);
+			return;
+		}
+	}
 	//check to see if inode_count is 1024, if yes then exit
+	if(inode_count == MAX_INODES){
+		printf("ERROR: max inodes reached\n");
+		return;
+	}
+	
 	//create new inode with new inode)count, set its parent_inode and type and also its name
+	//new inode should be created at the lowest availaible inode, which is one after the inode_count?
+	Inode new_inode;
+	new_inode.inode = find_free_inode();//inode number
+	new_inode.parent_inode = curr_inode;//parent inode is the same as the directory mkdir is called from
+	new_inode.type = 'd';//creating directory
+	strncpy(new_inode.name, name, NAME_LEN); //name is the name of the created directory
+	
+
 	//create file with its name as the inode number
-	//white into this file its . and .. values
+	FILE *fp = create_inode_file(new_inode.inode, "wb");
+	//write . and .. values into this new file
+	//add inode to current directory's file
+
+	//add new_inode to inode_list and increment inode_count
+	inode_list[inode_count] = new_inode;
+	inode_count++;
 }
+
 
 void create_file(const char *name){ //touch
 	//iterate through inode_list to see if filename exists, if yes then exit
@@ -138,32 +231,7 @@ void create_file(const char *name){ //touch
 	//create file with its name as the inode number
 	//write into this file its filename
 }
-//----------------------------------------------------------------------------------------
-//HELPER FUNCTIONS
-//helper to check if user commands have all expected compoents
-bool valid(char *cmd, char *arg, char *extra){
-	//takes_none: commads that don't expect any arguments
-	//takes_arg: comands that expect one argument
-	bool takes_none = (strcmp(cmd, "exit") == 0 || strcmp(cmd, "ls") == 0);
-	bool takes_arg = (strcmp(cmd, "cd") == 0 || strcmp(cmd, "mkdir") == 0 || strcmp(cmd, "touch") == 0);
-        
-	if(!takes_none && !takes_arg){ //neither of the recognized categories, so unknown command
-		printf("ERROR: unrecognized command\n");
-		return false;
-	}
-	if(takes_none && arg != NULL){ //exit and ls are inputted w arguments
-		printf("ERROR: %s does not expect arguments\n", cmd);
-		return false;
-	}
-	if(takes_arg && (arg == NULL || extra != NULL)){ //cd, mkdir, touch w no arg or extra args
-		printf("ERROR: %s expects exactly one argument\n", cmd);
-		return false;
-	}
-	return true;
-	//true = commands and arguments match the expected amount
-	//false = commands and arguments don't match the expected amount
 
-}
 //----------------------------------------------------------------------------------------
 //MAIN
 int main(int argc, char *argv[]){
@@ -172,7 +240,7 @@ int main(int argc, char *argv[]){
 		//(REQUIREMENT 2)
 		//switch program's working directory into emulated folder fs (using chdir)
 		if(chdir(argv[1]) == 0){
-			printf("Directory changed to %s\n", argv[1]);
+			//printf("Directory changed to %s\n", argv[1]);
 			//path argument is inodes_list since we're already inside fs directory
 			load_inode_list("inodes_list");	
 		
@@ -180,7 +248,7 @@ int main(int argc, char *argv[]){
 			char *input = NULL;
 			size_t cap = 0;
 
-			while(1){//loop until user types ctrl+d
+			while(1){//loop until user types ctrl+d or exit
 				printf("> ");
 				//take user commands as input from stdin
 				if(getline(&input, &cap, stdin) == -1) break;
@@ -196,7 +264,7 @@ int main(int argc, char *argv[]){
 				if(!valid(cmd, arg, extra)) continue;
 
 				//32 filename length limit
-				char arg_len[NAME_LEN + 1];
+				char arg_len[NAME_LEN + 1] = "";
 				if(arg != NULL){
 					strncpy(arg_len, arg, NAME_LEN); //copy 32 characters
 					arg_len[NAME_LEN] = '\0'; //33rd character is null terminator
