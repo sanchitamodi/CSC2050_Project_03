@@ -96,7 +96,26 @@ void create_file(const char *name){
 	//create file with its name as the inode number
 	//write into this file its filename
 }
+//helper to check if user commands have all expected compoents
+bool valid(char *cmd, char *arg){
+	bool takes_none = (strcmp(cmd, "exit") == 0 || strcmp(cmd, "ls") == 0);
+	bool takes_arg = (strcmp(cmd, "cd") == 0 || strcmp(cmd, "mkdir") == 0 || strcmp(cmd, "touch") == 0);
+        
+	if(!takes_none && !takes_arg){
+		printf("ERROR: unrecognized command");
+		return false;
+	}
+	if(takes_none && arg != NULL){
+		printf("ERROR: %s does not expect arguments\n", cmd);
+		return false;
+	}
+	if(takes_arg && arg == NULL){
+		printf("ERROR: %s expects exactly one argument\n", cmd);
+		return false;
+	}
+	return true;
 
+}
 
 int main(int argc, char *argv[]){
 	//(REQUIREMENT 1) accept directory name as command line argument
@@ -121,72 +140,41 @@ int main(int argc, char *argv[]){
 				char *cmd = strtok(input, " \t\n");//can be separated by space, tab, or \n
 				char *arg = strtok(NULL, " \t\n"); //null if there is no second word
 
-					//32 filename length limit
-					char arg_len[NAME_LEN];
-					if(arg != NULL){
-						strncpy(arg_len, arg, NAME_LEN - 1); //copy 32 characters
-						arg_len[NAME_LEN - 1] = '\0'; //last char is null terminator
-					}
+				//check if empty command
+                                if(cmd == NULL && arg == NULL){
+                                        printf("ERROR: no command provided\n");
+                                        continue;
+                                }
 
-					//commands and their behavior
-					if(strcmp(cmd, "exit") == 0){ //exit has not argument
-						if(arg_len == NULL){
-							//save state of inode list (REQUIREMENT 4)
-						}
-						else{
-							printf("ERROR: exit command has no arguments\n");
-							break;
-						}
-						
-					}
-					else if(strcmp(cmd, "cd") == 0){ //directory name must be given
-						if(arg_len != NULL){
-							//change to specified directory 
-							//(check if directory exists, if not throw error)
-						}
-						else{
-							printf("ERROR: specify a directory name\n");
-							break;
-						}
-					}
-					else if(strcmp(cmd, "ls") == 0){
-						if(arg_len == NULL){
-                                                        //list contents (names and inodes of curr directory
-                                                }
-                                                else{
-                                                        printf("ERROR: ls command has no arguments\n");
-                                                        break;
-                                                }
-					}
-					else if(strcmp(cmd, "mkdir") == 0){
-						if(arg_len != NULL){
-                                                        //create new directory with specified name
-                                                        //(check if directory exists, if yes throw error)
-                                                	//LOOK AT OTHER REQUIREMENTS FROM SPECS
-						
-						}
-                                                else{
-                                                        printf("ERROR: specify a new directory name\n");
-                                                        break;
-                                                }
-					}
-					else if(strcmp(cmd, "touch") == 0){
-						if(arg_len != NULL){
-                                                        //create new regular with specified name
-                                                        //(check if file exists, if yes do nothing)
-                                                        //LOOK AT OTHER REQUIREMENTS FROM SPECS
-                                                
-                                                }
-                                                else{
-                                                        printf("ERROR: specify a new file name\n");
-                                                        break;
-                                                }
-					}
-					else{
-						printf("ERROR: unrecognized command\n");
-						break;
-					}
-			}
+				//32 filename length limit
+				char arg_len[NAME_LEN + 1];
+				if(arg != NULL){
+					strncpy(arg_len, arg, NAME_LEN); //copy 32 characters
+					arg_len[NAME_LEN] = '\0'; //last char is null terminator
+				}
+
+				//commands and their behavior
+				if(strcmp(cmd, "exit") == 0){
+					if(!valid(cmd, arg)) continue;
+					//function
+				}
+				else if(strcmp(cmd, "cd") == 0){ 
+					if(!valid(cmd, arg)) continue;
+                                        //function
+				}
+				else if(strcmp(cmd, "ls") == 0){
+					if(!valid(cmd, arg)) continue;
+                                        //function
+				}
+				else if(strcmp(cmd, "mkdir") == 0){
+					if(!valid(cmd, arg)) continue;
+                                        //function
+				}
+				else if(strcmp(cmd, "touch") == 0){
+					if(!valid(cmd, arg)) continue;
+                                        //function
+				}
+			}//end while(1)
 		
 		
 		}
