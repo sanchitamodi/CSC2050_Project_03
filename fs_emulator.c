@@ -129,7 +129,7 @@ int main(int argc, char *argv[]){
 					}
 
 					//commands and their behavior
-					if(cmd == "exit"){ //exit has not argument
+					if(strcmp(cmd, "exit") == 0){ //exit has not argument
 						if(arg_len == NULL){
 							//save state of inode list (REQUIREMENT 4)
 						}
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]){
 						}
 						
 					}
-					else if(cmd == "cd"){ //directory name must be given
+					else if(strcmp(cmd, "cd") == 0){ //directory name must be given
 						if(arg_len != NULL){
 							//change to specified directory 
 							//(check if directory exists, if not throw error)
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
 							break;
 						}
 					}
-					else if(cmd == "ls"){
+					else if(strcmp(cmd, "ls") == 0){
 						if(arg_len == NULL){
                                                         //list contents (names and inodes of curr directory
                                                 }
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]){
                                                         break;
                                                 }
 					}
-					else if(cmd == "mkdir"){
+					else if(strcmp(cmd, "mkdir") == 0){
 						if(arg_len != NULL){
                                                         //create new directory with specified name
                                                         //(check if directory exists, if yes throw error)
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]){
                                                         break;
                                                 }
 					}
-					else if(cmd == "touch"){
+					else if(strcmp(cmd, "touch") == 0){
 						if(arg_len != NULL){
                                                         //create new regular with specified name
                                                         //(check if file exists, if yes do nothing)
