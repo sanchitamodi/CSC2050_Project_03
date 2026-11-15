@@ -33,7 +33,7 @@ void load_inode_list(const char *path){
 		printf("ERROR: unable to open file %s\n", path);
 		exit(1);
 	}
-	else{//read till EOF or inode_count = MAX_INODES
+	else{//read from file
 		Inode temp; //to read and validate indicators before storing to inode_list
 		//read from file and store to temp for validation:
 		while(fread(&temp, sizeof(Inode), 1, fp) == 1){
@@ -107,21 +107,100 @@ int main(int argc, char *argv[]){
 			printf("Directory changed to %s\n", argv[1]);
 			//path argument is inodes_list since we're already inside fs directory
 			load_inode_list("inodes_list");	
+		
+			//(REQUIREMENT 3)
+			while(true){//loop until user types ctrl+d
+				//take user commands as input from stdin
+				char input[256];
+				if(fgets(input, sizeof(input), stdin) != NULL){
+					char *new_line = strchr(input, '\n');
+
+					if(new_line != NULL){ //replace \n w null terminator
+						*new_line = '\n';
+					}
+				
+					//parse user input
+					char *cmd = strtok(input, " ");
+					char *arg = strtok(NULL, " "); //null if there is no second word
+
+					//32 filename length limit
+					char arg_len[NAME_LEN];
+					if(arg != NULL){
+						strncpy(arg_len, arg, NAME_LEN - 1); //copy 32 characters
+						arg_len[NAME_LEN - 1] = '\0'; //last char is null terminator
+					}
+
+					//commands and their behavior
+					if(cmd == "exit"){ //exit has not argument
+						if(arg_len == NULL){
+							//save state of inode list (REQUIREMENT 4)
+						}
+						else{
+							printf("ERROR: exit command has no arguments\n");
+							break;
+						}
+						
+					}
+					else if(cmd == "cd"){ //directory name must be given
+						if(arg_len != NULL){
+							//change to specified directory 
+							//(check if directory exists, if not throw error)
+						}
+						else{
+							printf("ERROR: specify a directory name\n");
+							break;
+						}
+					}
+					else if(cmd == "ls"){
+						if(arg_len == NULL){
+                                                        //list contents (names and inodes of curr directory
+                                                }
+                                                else{
+                                                        printf("ERROR: ls command has no arguments\n");
+                                                        break;
+                                                }
+					}
+					else if(cmd == "mkdir"){
+						if(arg_len != NULL){
+                                                        //create new directory with specified name
+                                                        //(check if directory exists, if yes throw error)
+                                                	//LOOK AT OTHER REQUIREMENTS FROM SPECS
+						
+						}
+                                                else{
+                                                        printf("ERROR: specify a new directory name\n");
+                                                        break;
+                                                }
+					}
+					else if(cmd == "touch"){
+						if(arg_len != NULL){
+                                                        //create new regular with specified name
+                                                        //(check if file exists, if yes do nothing)
+                                                        //LOOK AT OTHER REQUIREMENTS FROM SPECS
+                                                
+                                                }
+                                                else{
+                                                        printf("ERROR: specify a new file name\n");
+                                                        break;
+                                                }
+					}
+					else{
+						printf("ERROR: unrecognized command\n");
+						break;
+					}
+			}
+		
+		
 		}
 		else{
 			perror("chdir failed\n");
 			exit(1);
 		}
-
 	}
 	else{
 		printf("ERROR: zero or more than one command line arguments were provided\n");
 		exit(1);
 	}
-
-
-
-
 	return 0;
 }
 
