@@ -101,22 +101,26 @@ void create_file(const char *name){
 //HELPER FUNCTIONS
 //helper to check if user commands have all expected compoents
 bool valid(char *cmd, char *arg, char *extra){
+	//takes_none: commads that don't expect any arguments
+	//takes_arg: comands that expect one argument
 	bool takes_none = (strcmp(cmd, "exit") == 0 || strcmp(cmd, "ls") == 0);
 	bool takes_arg = (strcmp(cmd, "cd") == 0 || strcmp(cmd, "mkdir") == 0 || strcmp(cmd, "touch") == 0);
         
-	if(!takes_none && !takes_arg){
+	if(!takes_none && !takes_arg){ //neither of the recognized categories, so unknown command
 		printf("ERROR: unrecognized command\n");
 		return false;
 	}
-	if(takes_none && arg != NULL){
+	if(takes_none && arg != NULL){ //exit and ls are inputted w arguments
 		printf("ERROR: %s does not expect arguments\n", cmd);
 		return false;
 	}
-	if(takes_arg && (arg == NULL || extra != NULL)){ //no arg or extra arg (wrong number of args)
+	if(takes_arg && (arg == NULL || extra != NULL)){ //cd, mkdir, touch w no arg or extra args
 		printf("ERROR: %s expects exactly one argument\n", cmd);
 		return false;
 	}
 	return true;
+	//true = commands and arguments match the expected amount
+	//false = commands and arguments don't match the expected amount
 
 }
 //----------------------------------------------------------------------------------------
