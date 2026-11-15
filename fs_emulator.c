@@ -104,18 +104,21 @@ int main(int argc, char *argv[]){
 		//(REQUIREMENT 2)
 		//switch program's working directory into emulated folder fs (using chdir)
 		if(chdir(argv[1]) == 0){
-			printf("Directory changed to %s", argv[1]);
-			//path argument is inodes_list since were already inside fs
-		
+			printf("Directory changed to %s\n", argv[1]);
+			//path argument is inodes_list since we're already inside fs directory
+			load_inode_list("inodes_list");	
 		}
 		else{
-			perror("chdir failed");
+			perror("chdir failed\n");
+			exit(1);
 		}
 
 	}
 	else{
-		printf("ERROR: zero or more than one command line arguments were provided.");
+		printf("ERROR: zero or more than one command line arguments were provided\n");
+		exit(1);
 	}
+
 
 
 
