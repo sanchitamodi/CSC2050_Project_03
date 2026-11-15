@@ -97,19 +97,19 @@ void create_file(const char *name){
 	//write into this file its filename
 }
 //helper to check if user commands have all expected compoents
-bool valid(char *cmd, char *arg){
+bool valid(char *cmd, char *arg, char *extra){
 	bool takes_none = (strcmp(cmd, "exit") == 0 || strcmp(cmd, "ls") == 0);
 	bool takes_arg = (strcmp(cmd, "cd") == 0 || strcmp(cmd, "mkdir") == 0 || strcmp(cmd, "touch") == 0);
         
 	if(!takes_none && !takes_arg){
-		printf("ERROR: unrecognized command");
+		printf("ERROR: unrecognized command\n");
 		return false;
 	}
 	if(takes_none && arg != NULL){
 		printf("ERROR: %s does not expect arguments\n", cmd);
 		return false;
 	}
-	if(takes_arg && arg == NULL){
+	if(takes_arg && (arg == NULL || extra != NULL)){ //no arg or extra arg (wrong number of args)
 		printf("ERROR: %s expects exactly one argument\n", cmd);
 		return false;
 	}
@@ -139,6 +139,7 @@ int main(int argc, char *argv[]){
 				//parse user input
 				char *cmd = strtok(input, " \t\n");//can be separated by space, tab, or \n
 				char *arg = strtok(NULL, " \t\n"); //null if there is no second word
+				char *extra = strtok(NULL, " \t\n");//more than one argument provided
 
 				//check if empty command
                                 if(cmd == NULL && arg == NULL){
