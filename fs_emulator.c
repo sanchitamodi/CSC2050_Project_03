@@ -31,7 +31,7 @@ void load_inode_list(const char *path){
 
 	FILE *fp = fopen(path, "rb");//open specified file to read
 	if(fp == NULL){ //check successfull open
-		printf("ERROR: unable to open file %s\n", path);
+		printf("ERROR: unable to open file %s for reading\n", path);
 		exit(1);
 	}
 	else{//read from file
@@ -66,10 +66,24 @@ void load_inode_list(const char *path){
 		fclose(fp);//close file pointer after reading
 	}
 }
-
+//(REQUIREMENT 4)
 void save_inode_list(const char *path){
 	//write content of inode_list to file path
-
+	FILE *fp = fopen(path, "wb");
+	if(fp == NULL){ //check successfull open
+                printf("ERROR: unable to open file %s for writing\n", path);
+                exit(1);
+        }
+        else{
+		for(size_t i = 0; i < inode_count; i++){
+			if(fwrite(&inode_list[i], sizeof(Inode), 1, fp) != 1){
+				printf("ERROR: failed to write inode %u\n", inode_list[i].inode);
+				fclose(fp);
+				exit(1);
+			}
+		}
+		fclose(fp);
+	}
 }
 
 void change_dir(const char *name){
@@ -183,6 +197,8 @@ int main(int argc, char *argv[]){
 			}//end while(1)
 		
 			free(input); //free stdin input read using getline
+			save_inode_list("inodes_list");
+			return 0;
 		}
 		else{//coudn't change into file sys directory
 			perror("chdir failed\n");
