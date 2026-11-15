@@ -90,19 +90,19 @@ void save_inode_list(const char *path){ //after exit
 }
 
 void change_dir(const char *name){ //cd
-	//iterate through inode_list to search whether a directory with name alr exists (optimize?)
+	//iterate through inode_list to search whether a directory with name exists
 	//if yes, then set curr_inode value to the inode at index i
-	//otherwise print an error message to indicate that directory was not found
-	//if specified name isn't a directory (DNE or regular file), report error and don't change directory
+	//otherwise print an error message to indicate that specified name isn't a directory (DNE or regular file), 
+	//report error and don't change directory
 	
 	for(size_t i = 0; i < inode_count; i++){
 		//check if parent and current directories match, name matches and is a directory, if yes then switch
 		if(inode_list[i].parent_inode == curr_inode 
 				&& strncmp(inode_list[i].name, name, NAME_LEN) == 0 
 				&& inode_list[i].type == 'd'){
-			//directory with specified name exists, so change directory
-			curr_inode = inode_list[i].inode;
-			return;
+	
+			curr_inode = inode_list[i].inode; //directory with specified name exists, so change directory
+			return; //no need to keep iterating since file and directory names are unique
 		}	
 	}
 	printf("ERROR: specified name is not a directory or does not exist\n");
