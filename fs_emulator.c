@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#define MAX_INODES 1024
-#define NAME_LEN 32
+#define MAX_INODES 1024 //max number of inodes
+#define NAME_LEN 32 //max # of characters for file/directory names
 
 //----------------------------------------------------------------------------------------
-//Inode structure
+//INODE STRUCT
 typedef struct{
 	uint32_t inode;
 	uint32_t parent_inode;
@@ -20,8 +20,9 @@ typedef struct{
 Inode inode_list[MAX_INODES];//array of inodes, each inode represents file or directory
 size_t inode_count = 0;//count of # of inodes in list, initialized to zero
 uint32_t curr_inode = 0; //var to keep track of curr inode
+
 //----------------------------------------------------------------------------------------
-//FUNCTIONS
+//REQUIRED FUNCTIONS
 //(REQUIREMENT 2)
 void load_inode_list(const char *path){
 	//read inode_list from file path to inode_list array
@@ -96,6 +97,8 @@ void create_file(const char *name){
 	//create file with its name as the inode number
 	//write into this file its filename
 }
+//----------------------------------------------------------------------------------------
+//HELPER FUNCTIONS
 //helper to check if user commands have all expected compoents
 bool valid(char *cmd, char *arg, char *extra){
 	bool takes_none = (strcmp(cmd, "exit") == 0 || strcmp(cmd, "ls") == 0);
@@ -116,7 +119,8 @@ bool valid(char *cmd, char *arg, char *extra){
 	return true;
 
 }
-
+//----------------------------------------------------------------------------------------
+//MAIN
 int main(int argc, char *argv[]){
 	//(REQUIREMENT 1) accept directory name as command line argument
 	if(argc == 2){
@@ -152,30 +156,31 @@ int main(int argc, char *argv[]){
 					strncpy(arg_len, arg, NAME_LEN); //copy 32 characters
 					arg_len[NAME_LEN] = '\0'; //last char is null terminator
 				}
+				//arg_len is the argument modified to fit the limit of 32 chars
+				//for directory and file names, so all functions use arg_len as parameters 
 
 				//commands and their behavior
 				if(strcmp(cmd, "exit") == 0){
-					break;
-					//break out of while loop
+					//save_inode_list (REQUIREMENT 4)
+					break;//break out of while loop
 				}
 				else if(strcmp(cmd, "cd") == 0){ 
-                                        //function
+                                        list_contents();
 				}
 				else if(strcmp(cmd, "ls") == 0){
-					//function
+					change_dir(arg_len);
 				}
 				else if(strcmp(cmd, "mkdir") == 0){
-                                        //function
+                                        create_dir(arg_len);
 				}
 				else if(strcmp(cmd, "touch") == 0){
-                                        //function
+                                        create_file(arg_len);
 				}
 			}//end while(1)
 		
-		
+			free(input); //free stdin input read using getline
 		}
-		free(input); //free stdin input read using getline
-		else{
+		else{//coudn't change into file sys directory
 			perror("chdir failed\n");
 			exit(1);
 		}
