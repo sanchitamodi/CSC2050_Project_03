@@ -109,19 +109,17 @@ int main(int argc, char *argv[]){
 			load_inode_list("inodes_list");	
 		
 			//(REQUIREMENT 3)
-			while(true){//loop until user types ctrl+d
-				//take user commands as input from stdin
-				char input[256];
-				if(fgets(input, sizeof(input), stdin) != NULL){
-					char *new_line = strchr(input, '\n');
+			char *input = NULL;
+			size_t cap = 0;
 
-					if(new_line != NULL){ //replace \n w null terminator
-						*new_line = '\n';
-					}
+			while(1){//loop until user types ctrl+d
+				printf("> ");
+				//take user commands as input from stdin
+				if(getline(&input, &cap, stdin) == -1) break;
 				
-					//parse user input
-					char *cmd = strtok(input, " ");
-					char *arg = strtok(NULL, " "); //null if there is no second word
+				//parse user input
+				char *cmd = strtok(input, " \t\n");//can be separated by space, tab, or \n
+				char *arg = strtok(NULL, " \t\n"); //null if there is no second word
 
 					//32 filename length limit
 					char arg_len[NAME_LEN];
@@ -192,6 +190,7 @@ int main(int argc, char *argv[]){
 		
 		
 		}
+		free(input); //free stdin input read using getline
 		else{
 			perror("chdir failed\n");
 			exit(1);
