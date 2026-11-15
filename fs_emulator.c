@@ -191,8 +191,8 @@ int main(int argc, char *argv[]){
 				char *extra = strtok(NULL, " \t\n");//more than one argument provided
 
 				//check if empty command
-                                if(cmd == NULL) continue;
-                                //check validity
+				if(cmd == NULL) continue;
+				//check validity
 				if(!valid(cmd, arg, extra)) continue;
 
 				//32 filename length limit
@@ -201,8 +201,9 @@ int main(int argc, char *argv[]){
 					strncpy(arg_len, arg, NAME_LEN); //copy 32 characters
 					arg_len[NAME_LEN] = '\0'; //33rd character is null terminator
 				}
-				//arg_len is the argument modified to fit the limit of 32 chars
-				//for directory and file names, so all functions use arg_len as parameters 
+				//arg_len is the argument modified to fit the limit of 32 chars for directory and file names, 
+				//so all functions use arg_len as parameters since it's the shortened version of arg to meet limits 
+
 
 				//commands and their behavior
 				if(strcmp(cmd, "exit") == 0){
@@ -210,16 +211,16 @@ int main(int argc, char *argv[]){
 					break;//break out of while loop
 				}
 				else if(strcmp(cmd, "cd") == 0){ 
-                                        change_dir(arg_len);
+					change_dir(arg_len);
 				}
 				else if(strcmp(cmd, "ls") == 0){
 					list_contents();
 				}
 				else if(strcmp(cmd, "mkdir") == 0){
-                                        create_dir(arg_len);
+					create_dir(arg_len);
 				}
 				else if(strcmp(cmd, "touch") == 0){
-                                        create_file(arg_len);
+					create_file(arg_len);
 				}
 			}//end while(1)
 		
