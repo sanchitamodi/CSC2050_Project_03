@@ -198,6 +198,13 @@ void create_dir(const char *name){ //mkdir
 			return;
 		}
 	}
+
+	uint32_t free_inode = find_free_inode();//unused inode number
+	if(free_inode == UINT32_MAX){//UINT32_MAX is the equivalent of checking for -1 in int
+		printf("ERROR: no availaible inodes\n");
+		return;
+	}
+
 	//check to see if inode_count is 1024, if yes then exit
 	if(inode_count == MAX_INODES){
 		printf("ERROR: max inodes reached\n");
@@ -207,7 +214,7 @@ void create_dir(const char *name){ //mkdir
 	//create new inode with new inode)count, set its parent_inode and type and also its name
 	//new inode should be created at the lowest availaible inode, which is one after the inode_count?
 	Inode new_inode;
-	new_inode.inode = find_free_inode();//inode number
+	new_inode.inode = free_inode;//inode number
 	new_inode.parent_inode = curr_inode;//parent inode is the same as the directory mkdir is called from
 	new_inode.type = 'd';//creating directory
 	strncpy(new_inode.name, name, NAME_LEN); //name is the name of the created directory
@@ -215,8 +222,29 @@ void create_dir(const char *name){ //mkdir
 
 	//create file with its name as the inode number
 	FILE *fp = create_inode_file(new_inode.inode, "wb");
-	//write . and .. values into this new file
+	if(fp == NULL){ //file creation failed
+		printf("ERROR: couldn't create file for inode %u\n", new_inode.inode);
+		return;
+	}
+	//write . and .. values into this new file on two different lines
+	char line[64];
+	int len = snprintf(line, sizeof(line), ". %u\n", new_inode.inode);
+	fwrite(line, 1, len, fp); //write len bytes to new file w/o \0
+	len = snprintf(line, sizeof(line), ".. %u\n", curr_inode); //curr_inode is the parent
+	fwrite(line, 1, len, fp);
+	fclose(fp);
+	
 	//add inode to current directory's file
+	FILE *fp = create_inode_file(curr_inode, "ab"); //from slides: "ab" appends instead of overwriting
+	//curr_inode is the current directory, so we update that with new inode number and name
+	if(fp == NULL){
+		printf("ERROR: couldn't update current directory with new inode\n");
+		return;
+	}
+	fwrite(&new_inode.inode, sizeof(uint32_t), 1, fp); //inode number
+	fwrite(new_inode.name, NAME_LEN, 1, fp); //32 char (max) name
+
+	fclose(fp);
 
 	//add new_inode to inode_list and increment inode_count
 	inode_list[inode_count] = new_inode;
