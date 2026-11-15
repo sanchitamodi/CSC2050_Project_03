@@ -11,18 +11,16 @@
 typedef struct{
 	uint32_t inode;
 	uint32_t parent_inode;
+	char name[NAME_LEN];
 	char type;
-	char name[32];
 } Inode;
 
-//recomended variables to use
-int main(void){
-	Inode inode_list[MAX_INODES];//array of inodes, each inode represents file or directory
-	size_t inode_count = 0;//count of # of inodes in list, initialized to zero
-	uint32_t curr_inode = 0; //var to keep track of curr inode
+//GLOBAL VARIABLES
+Inode inode_list[MAX_INODES];//array of inodes, each inode represents file or directory
+size_t inode_count = 0;//count of # of inodes in list, initialized to zero
+uint32_t curr_inode = 0; //var to keep track of curr inode
 
-	return 0;
-}
+//FUNCTIONS
 
 //function headers from slides
 void load_inode_list(const char *path){
@@ -63,6 +61,20 @@ void create_file(const char *name){
 }
 
 
+int main(int argc, char *argv[]){
+	//accept directory name as command line argument (requirement 1)
+	if(argc == 2){
+		//switch program's working directory into emulated folder fs (using chdir)
+	
 
+	}
+	else{
+		printf("ERROR: zero or more than one command line arguments were provided.");
+	}
+
+
+
+	return 0;
+}
 
 
