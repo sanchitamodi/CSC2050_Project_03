@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define MAX_INODES 1024 //max number of inodes
 #define NAME_LEN 32 //max # of characters for file/directory names
@@ -89,10 +90,25 @@ void save_inode_list(const char *path){ //after exit
 }
 
 void change_dir(const char *name){ //cd
-	//iterate through inode_list to search whether a directory with name alr exists
-	//if yes, then set curr_inode value to the index of the list with that name
+	//iterate through inode_list to search whether a directory with name alr exists (optimize?)
+	//if yes, then set curr_inode value to the inode at index i
 	//otherwise print an error message to indicate that directory was not found
+	//if specified name isn't a directory (DNE or regular file), report error and don't change directory
+	
+	for(size_t i = 0; i < inode_count; i++){
+		//check if parent and current directories match, name matches and is a directory, if yes then switch
+		if(inode_list[i].parent_inode == curr_inode 
+				&& strncmp(inode_list[i].name, name, NAME_LEN) == 0 
+				&& inode_list[i].type == 'd'){
+			//directory with specified name exists, so change directory
+			curr_inode = inode_list[i].inode;
+			return;
+		}	
+	}
+	printf("ERROR: specified name is not a directory or does not exist\n");
+
 }
+
 
 void list_contents(){ //ls
 	//iterate through inodes_list and print members of those elements in the list for which 
@@ -194,10 +210,10 @@ int main(int argc, char *argv[]){
 					break;//break out of while loop
 				}
 				else if(strcmp(cmd, "cd") == 0){ 
-                                        list_contents();
+                                        change_dir(arg_len);
 				}
 				else if(strcmp(cmd, "ls") == 0){
-					change_dir(arg_len);
+					list_contents();
 				}
 				else if(strcmp(cmd, "mkdir") == 0){
                                         create_dir(arg_len);
